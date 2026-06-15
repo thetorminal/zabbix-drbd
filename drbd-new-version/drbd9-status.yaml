@@ -1,0 +1,56 @@
+zabbix_export:
+  version: '7.0'
+  template_groups:
+    - uuid: 7df96b18c230490a9a0a9e2307226338
+      name: Templates
+  templates:
+    - uuid: af7d268c3fee47b5b3e9380a199c2f05
+      template: 'Template DRBD 9.x Status'
+      name: 'Template DRBD 9.x Status'
+      description: |
+        Monitoring of DRBD via "drbdadm status".
+        Warning if the primary host changes or peer goes offline.
+        ---
+        Source: https://github.com/thetorminal/zabbix-drbd
+      groups:
+        - name: Templates
+      items:
+        - uuid: c836340b2ffe4d45a190b4db2045313c
+          name: 'DRBD: Output of drbdadm status'
+          key: drbd.status
+          delay: 10m
+          value_type: TEXT
+          trends: '0'
+          description: 'Tracking of DRBD status via drbdadm status'
+          triggers:
+            - uuid: 3641006d0629489aa7dd806118c20ad1
+              expression: 'find(/Template DRBD 9.x Status/drbd.status,,"like","role:Primary")=0'
+              recovery_mode: RECOVERY_EXPRESSION
+              recovery_expression: 'find(/Template DRBD 9.x Status/drbd.status,,"like","role:Primary")=1'
+              name: 'DRBD: Host is no longer Primary'
+              priority: HIGH
+              description: 'Node no longer primary.'
+            - uuid: cf15224549cb4597941ddbca8159620a
+              expression: 'find(/Template DRBD 9.x Status/drbd.status,,"like","disk:UpToDate")=0'
+              recovery_mode: RECOVERY_EXPRESSION
+              recovery_expression: 'find(/Template DRBD 9.x Status/drbd.status,,"like","disk:UpToDate")=1'
+              name: 'DRBD: Local disk is not UpToDate'
+              priority: HIGH
+              description: 'DRBD local disk not in state "UpToDate".'
+            - uuid: 3455bb62b636475394a7004af90517c2
+              expression: 'find(/Template DRBD 9.x Status/drbd.status,,"like","peer role:Secondary")=0'
+              recovery_mode: RECOVERY_EXPRESSION
+              recovery_expression: 'find(/Template DRBD 9.x Status/drbd.status,,"like","peer role:Secondary")=1'
+              name: 'DRBD: Peer is not Secondary (connection problem)'
+              priority: HIGH
+              description: 'Peer-Host not connected as secondary.'
+            - uuid: 046a5b402c71499dbec600eeb0c197a5
+              expression: 'find(/Template DRBD 9.x Status/drbd.status,,"like","replication:Established")=0 and find(/Template DRBD 9.x Status/drbd.status,,"like","peer role:Secondary")=1'
+              recovery_mode: RECOVERY_EXPRESSION
+              recovery_expression: 'find(/Template DRBD 9.x Status/drbd.status,,"like","replication:Established")=1'
+              name: 'DRBD: Replication not established'''
+              priority: WARNING
+              description: 'Peer connected, but replication not in state "Established".'
+      tags:
+        - tag: App
+          value: DRBD

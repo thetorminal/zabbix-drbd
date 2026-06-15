@@ -13,6 +13,9 @@ Tested with:
 * Zabbix Server 6 & Zabbix Server 7
 * zabbix-agent2 / DRBD 9.x (on Debian 12 server)
 
+Example:  
+<img width="517" height="60" alt="drbd_example_zabbix" src="https://github.com/user-attachments/assets/bd965b59-afc3-4335-83b5-a3b940aefdf4" />  
+
 ## Getting Started
 ### Dependencies
 * Zabbix-Server
